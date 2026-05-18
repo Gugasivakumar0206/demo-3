@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react'
 import { PageContainer, StatusBadge } from '../../components/ui/index'
 import DataTable from '../../components/tables/DataTable'
-import { getItems } from '../../lib/api'
+import { deleteItem, getItems } from '../../lib/api'
 
 const COLUMNS = [
   { key: 'id', label: 'ID', width: 100 },
   { key: 'itemCode', label: 'Item Code', width: 130 },
   { key: 'itemName', label: 'Item Name' },
+  { key: 'printName', label: 'Print Name', width: 180 },
   { key: 'itemGroup', label: 'Item Group', width: 150 },
   { key: 'uom', label: 'UOM', width: 100 },
   { key: 'hsnCode', label: 'HSN Code', width: 120 },
@@ -38,6 +39,7 @@ export default function ItemTypePage({
             id: item.id,
             itemCode: item.item_code,
             itemName: item.item_name,
+            printName: item.print_name || '-',
             itemGroup: item.item_group || '-',
             uom: item.uom || '-',
             hsnCode: item.hsn_code || '-',
@@ -74,6 +76,15 @@ export default function ItemTypePage({
         addPath={addPath}
         addLabel={addLabel}
         rowPath={rowPath}
+        onDelete={async (row) => {
+          if (!confirm(`Delete ${row.itemName}?`)) return
+          try {
+            await deleteItem(row.id)
+            setData((current) => current.filter((record) => record.id !== row.id))
+          } catch (deleteError) {
+            setError(deleteError.message || 'Unable to delete item.')
+          }
+        }}
       />
     </PageContainer>
   )
